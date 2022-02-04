@@ -5,7 +5,7 @@ const filename = "words.txt";
 const words = fs.readFileSync(filename, "utf8").split("\n");
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
   await page.goto("https://www.powerlanguage.co.uk/wordle/");
@@ -30,13 +30,13 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
               .querySelectorAll("game-tile")
               [i].getAttribute("evaluation");
 
-            let position =
-              evaluation === "correct" ? i : evaluation === "present" ? 5 : -1;
-
-            map.set(
-              position,
-              map.has(position) ? [...map.get(position), letter] : [letter]
-            );
+            if (evaluation === "correct") {
+              map.set(i, map.has(i) ? [...map.get(i), letter] : [letter]);
+            } else if (evaluation === "present") {
+              map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
+            } else {
+              map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
+            }
           }
 
           let hasCorrectAnswer = true;
@@ -62,12 +62,44 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
 
           // filter present letters
           if (filteredWords.length > 0) {
-            const presentLetters = map.get(5);
-            if (presentLetters) {
-              filteredWords = filteredWords.filter((word) =>
-                presentLetters.every((x) => word.indexOf(x) >= 0)
-              );
-            }
+            [
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "g",
+              "h",
+              "i",
+              "j",
+              "k",
+              "l",
+              "m",
+              "n",
+              "o",
+              "p",
+              "q",
+              "r",
+              "s",
+              "t",
+              "u",
+              "v",
+              "w",
+              "x",
+              "y",
+              "z",
+            ].map((letter) => {
+              const incorrectPosArr = map.get(letter);
+              if (incorrectPosArr) {
+                filteredWords = filteredWords.filter((word) =>
+                  incorrectPosArr.every(
+                    (pos) =>
+                      word.indexOf(letter) >= 0 && word.indexOf(letter) !== pos
+                  )
+                );
+              }
+            });
           }
 
           // filter absent letters
