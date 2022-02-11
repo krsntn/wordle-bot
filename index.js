@@ -105,9 +105,23 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
           // filter absent letters
           if (filteredWords.length > 0) {
             const absentLetters = map.get(-1);
+
             if (absentLetters) {
               filteredWords = filteredWords.filter((word) =>
-                absentLetters.every((x) => word.indexOf(x) === -1)
+                absentLetters.every((letter) => {
+                  let letterIndexPos = -1;
+
+                  // if absent letter contains in correct mapping
+                  // means the letter only occur once
+                  // filter words thats without second occurance
+                  [...map.entries()].some(([key, values]) => {
+                    if (key !== -1 && values.some((v) => v === letter)) {
+                      letterIndexPos = key;
+                    }
+                  });
+
+                  return word.indexOf(letter) === letterIndexPos;
+                })
               );
             }
           }
@@ -157,5 +171,5 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
 
   console.log("Answer:", ans);
 
-  await browser.close();
+  // await browser.close();
 })();
