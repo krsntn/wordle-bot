@@ -30,10 +30,13 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
               .querySelectorAll("game-tile")
               [i].getAttribute("evaluation");
 
-            if (evaluation === "correct") {
-              map.set(i, map.has(i) ? [...map.get(i), letter] : [letter]);
+            if (evaluation === "correct" && !map.has(i)) {
+              map.set(i, [letter]);
             } else if (evaluation === "present") {
               map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
+            } else if (evaluation === "absent" && map.has(letter)) {
+              map.set(letter, [...map.get(letter), i]);
+              map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
             } else {
               map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
             }
@@ -109,6 +112,9 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
             if (absentLetters) {
               filteredWords = filteredWords.filter((word) =>
                 absentLetters.every((letter) => {
+                  // if absent letter contain in present mapping
+                  if (map.get(letter)) return true;
+
                   let letterIndexPos = -1;
 
                   // if absent letter contains in correct mapping
