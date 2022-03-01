@@ -30,14 +30,16 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
               .querySelectorAll("game-tile")
               [i].getAttribute("evaluation");
 
-            if (evaluation === "correct" && !map.has(i)) {
-              map.set(i, [letter]);
+            if (evaluation === "correct") {
+              if (!map.has(i)) {
+                map.set(i, [letter]);
+              }
             } else if (evaluation === "present") {
               map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
-            } else if (evaluation === "absent" && map.has(letter)) {
-              map.set(letter, [...map.get(letter), i]);
-              map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
-            } else {
+            } else if (evaluation === "absent") {
+              if (map.has(letter)) {
+                map.set(letter, [...map.get(letter), i]);
+              }
               map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
             }
           }
@@ -108,7 +110,6 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
           // filter absent letters
           if (filteredWords.length > 0) {
             const absentLetters = map.get(-1);
-
             if (absentLetters) {
               filteredWords = filteredWords.filter((word) =>
                 absentLetters.every((letter) => {
