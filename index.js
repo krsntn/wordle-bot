@@ -37,9 +37,9 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
             } else if (evaluation === "present") {
               map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
             } else if (evaluation === "absent") {
-              if (map.has(letter)) {
-                map.set(letter, [...map.get(letter), i]);
-              }
+              // if (map.has(letter)) {
+              //   map.set(letter, [...map.get(letter), i]);
+              // }
               map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
             }
           }
@@ -113,25 +113,26 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
             if (absentLetters) {
               filteredWords = filteredWords.filter((word) =>
                 absentLetters.every((letter) => {
-                  // if absent letter contain in present mapping
-                  if (map.get(letter)) return true;
+                  let hasCorrectOcc = false;
 
-                  let letterIndexPos = -1;
-
-                  // if absent letter contains in correct mapping
-                  // means the letter only occur once
-                  // filter words thats without second occurance
                   [...map.entries()].some(([key, values]) => {
                     if (key !== -1 && values.some((v) => v === letter)) {
-                      letterIndexPos = key;
+                      hasCorrectOcc = true;
                     }
                   });
 
-                  return word.indexOf(letter) === letterIndexPos;
+                  if (hasCorrectOcc) {
+                    return word.indexOf(letter) === word.lastIndexOf(letter);
+                  }
+
+                  return word.indexOf(letter) === -1;
                 })
               );
             }
           }
+
+          console.log(map);
+          console.log(filteredWords);
 
           return filteredWords[0];
         }
