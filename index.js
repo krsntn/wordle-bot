@@ -1,17 +1,17 @@
-import puppeteer from "puppeteer";
-import fs from "fs";
+import puppeteer from 'puppeteer';
+import fs from 'fs';
 
-const filename = "words.txt";
-const words = fs.readFileSync(filename, "utf8").split("\n");
+const filename = 'words.txt';
+const words = fs.readFileSync(filename, 'utf8').split('\n');
 
 (async () => {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
-  await page.goto("https://www.powerlanguage.co.uk/wordle/");
+  await page.goto('https://www.nytimes.com/games/wordle/index.html');
   await page.waitForTimeout(400);
 
-  console.log("finding answer...");
+  console.log('finding answer...');
 
   const ans = await page.evaluate(
     (words) =>
@@ -22,21 +22,21 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
         function checkInput(gameRow, map) {
           for (let i = 0; i < 5; i++) {
             const letter = gameRow
-              .querySelectorAll("game-tile")
-              [i].getAttribute("letter");
+              .querySelectorAll('game-tile')
+              [i].getAttribute('letter');
 
             // absent, present, correct
             const evaluation = gameRow
-              .querySelectorAll("game-tile")
-              [i].getAttribute("evaluation");
+              .querySelectorAll('game-tile')
+              [i].getAttribute('evaluation');
 
-            if (evaluation === "correct") {
+            if (evaluation === 'correct') {
               if (!map.has(i)) {
                 map.set(i, [letter]);
               }
-            } else if (evaluation === "present") {
+            } else if (evaluation === 'present') {
               map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
-            } else if (evaluation === "absent") {
+            } else if (evaluation === 'absent') {
               // if (map.has(letter)) {
               //   map.set(letter, [...map.get(letter), i]);
               // }
@@ -68,32 +68,32 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
           // filter present letters
           if (filteredWords.length > 0) {
             [
-              "a",
-              "b",
-              "c",
-              "d",
-              "e",
-              "f",
-              "g",
-              "h",
-              "i",
-              "j",
-              "k",
-              "l",
-              "m",
-              "n",
-              "o",
-              "p",
-              "q",
-              "r",
-              "s",
-              "t",
-              "u",
-              "v",
-              "w",
-              "x",
-              "y",
-              "z",
+              'a',
+              'b',
+              'c',
+              'd',
+              'e',
+              'f',
+              'g',
+              'h',
+              'i',
+              'j',
+              'k',
+              'l',
+              'm',
+              'n',
+              'o',
+              'p',
+              'q',
+              'r',
+              's',
+              't',
+              'u',
+              'v',
+              'w',
+              'x',
+              'y',
+              'z',
             ].map((letter) => {
               const incorrectPosArr = map.get(letter);
               if (incorrectPosArr) {
@@ -140,34 +140,34 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
         function keyin(word) {
           for (let i = 0; i < 5; i++) {
             window.dispatchEvent(
-              new KeyboardEvent("keydown", { key: word[i] })
+              new KeyboardEvent('keydown', { key: word[i] })
             );
           }
-          window.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
         }
 
-        const appRoot = document.querySelector("game-app").shadowRoot;
-        appRoot.querySelector("game-modal").click();
+        const appRoot = document.querySelector('game-app').shadowRoot;
+        appRoot.querySelector('game-modal').click();
 
         const map = new Map();
-        let availableChoice = "arise";
+        let availableChoice = 'arise';
 
         for (let attempt = 0, done = false; attempt < 6 && !done; attempt++) {
           setTimeout(() => {
             keyin(availableChoice);
 
             const gameRow =
-              appRoot.querySelectorAll("game-row")[attempt].shadowRoot;
+              appRoot.querySelectorAll('game-row')[attempt].shadowRoot;
             done = checkInput(gameRow, map);
 
             if (done) {
-              let answer = "";
+              let answer = '';
               for (let i = 0; i < 5; i++) {
                 answer += map.get(i)[0];
               }
               resolve(answer);
             } else if (attempt === 5) {
-              resolve("sorry, not found.");
+              resolve('sorry, not found.');
             }
 
             availableChoice = getAvailableWord(map);
@@ -177,7 +177,7 @@ const words = fs.readFileSync(filename, "utf8").split("\n");
     words
   );
 
-  console.log("Answer:", ans);
+  console.log('Answer:', ans);
 
   // await browser.close();
 })();
