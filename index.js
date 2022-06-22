@@ -1,11 +1,14 @@
+import express from 'express';
 import puppeteer from 'puppeteer';
 import fs from 'fs';
+
+const app = express();
 
 const filename = 'words.txt';
 const words = fs.readFileSync(filename, 'utf8').split('\n');
 
-(async () => {
-  const browser = await puppeteer.launch({ headless: false });
+const getAnswer = async () => {
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   await page.goto('https://www.nytimes.com/games/wordle/index.html');
@@ -177,7 +180,24 @@ const words = fs.readFileSync(filename, 'utf8').split('\n');
     words
   );
 
-  console.log('Answer:', ans);
+  await browser.close();
 
-  // await browser.close();
-})();
+  console.log('Answer:', ans);
+  return ans;
+};
+
+app.get('/wordle', async (req, res) => {
+  // allow access from other domains
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+
+  const answer = await getAnswer();
+  // return a JSON object as a response
+  res.status(200).json({ answer });
+});
+
+// start app
+const port = process.env.PORT || 3000;
+app.listen(port, function () {
+  console.log('listening on port ' + port);
+});
