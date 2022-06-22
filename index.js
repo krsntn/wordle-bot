@@ -186,7 +186,7 @@ const getAnswer = async () => {
   return ans;
 };
 
-app.get('/wordle', async (req, res) => {
+app.get('/', async (req, res) => {
   // allow access from other domains
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'X-Requested-With');
