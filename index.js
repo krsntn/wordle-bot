@@ -195,6 +195,7 @@ app.get('/', async (req, res) => {
   res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 
   const answer = await getAnswer();
+
   // return a JSON object as a response
   res.status(200).json({ answer });
 });
