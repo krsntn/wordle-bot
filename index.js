@@ -8,7 +8,10 @@ const filename = 'words.txt';
 const words = fs.readFileSync(filename, 'utf8').split('\n');
 
 const getAnswer = async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+  });
   const page = await browser.newPage();
 
   await page.goto('https://www.nytimes.com/games/wordle/index.html');
