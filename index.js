@@ -25,16 +25,17 @@ const getAnswer = async () => {
         // absent: -1
         // present: 5
         // correct: 0-4
+
         function checkInput(gameRow, map) {
           for (let i = 0; i < 5; i++) {
             const letter = gameRow
-              .querySelectorAll('game-tile')
-              [i].getAttribute('letter');
+              .querySelectorAll('div[class^="Tile-module_tile"]')
+              [i].innerText.toLowerCase();
 
             // absent, present, correct
             const evaluation = gameRow
-              .querySelectorAll('game-tile')
-              [i].getAttribute('evaluation');
+              .querySelectorAll('div[class^="Tile-module_tile"]')
+              [i].getAttribute('data-state');
 
             if (evaluation === 'correct') {
               if (!map.has(i)) {
@@ -43,9 +44,6 @@ const getAnswer = async () => {
             } else if (evaluation === 'present') {
               map.set(letter, map.has(letter) ? [...map.get(letter), i] : [i]);
             } else if (evaluation === 'absent') {
-              // if (map.has(letter)) {
-              //   map.set(letter, [...map.get(letter), i]);
-              // }
               map.set(-1, map.has(-1) ? [...map.get(-1), letter] : [letter]);
             }
           }
@@ -137,8 +135,8 @@ const getAnswer = async () => {
             }
           }
 
-          console.log(map);
-          console.log(filteredWords);
+          // console.log('map', map);
+          // console.log('filteredWords', filteredWords);
 
           return filteredWords[0];
         }
@@ -152,31 +150,33 @@ const getAnswer = async () => {
           window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
         }
 
-        const appRoot = document.querySelector('game-app').shadowRoot;
-        appRoot.querySelector('game-modal').click();
-
+        const appRoot = document.querySelector('#wordle-app-game');
         const map = new Map();
         let availableChoice = 'arise';
 
         for (let attempt = 0, done = false; attempt < 6 && !done; attempt++) {
           setTimeout(() => {
-            keyin(availableChoice);
+            if (attempt !== 0) {
+              const gameRow = appRoot.querySelectorAll(
+                'div[class^="Row-module_row"]'
+              )[attempt - 1];
 
-            const gameRow =
-              appRoot.querySelectorAll('game-row')[attempt].shadowRoot;
-            done = checkInput(gameRow, map);
+              done = checkInput(gameRow, map);
 
-            if (done) {
-              let answer = '';
-              for (let i = 0; i < 5; i++) {
-                answer += map.get(i)[0];
+              if (done) {
+                let answer = '';
+                for (let i = 0; i < 5; i++) {
+                  answer += map.get(i)[0];
+                }
+                resolve(answer);
+              } else if (attempt == 5) {
+                resolve('sorry, not found.');
               }
-              resolve(answer);
-            } else if (attempt === 5) {
-              resolve('sorry, not found.');
+
+              availableChoice = getAvailableWord(map);
             }
 
-            availableChoice = getAvailableWord(map);
+            keyin(availableChoice);
           }, 3000 * attempt);
         }
       }),
